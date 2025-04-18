@@ -2,13 +2,14 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from app.models import Post, Page, Tag
 from flask_login import current_user
 from app import db
+from datetime import datetime
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
     posts = Post.query.order_by(Post.created_at.desc()).all()
-    return render_template('index.html', posts=posts)
+    return render_template('index.html', posts=posts, now = datetime.now())
 
 @bp.route('/tag/<slug>')
 def tag(slug):

@@ -1,0 +1,26 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+.contanier {
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+}
+header {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 0;
+}
+.nav_logo {
+  padding: 16px 0;
+  text-align: center;
+}
+.nav_logo h1 {
+  text-transform: uppercase;
+}
+
+footer {
+  padding: 32px 0;
+  text-align: center;
+}
