@@ -1,0 +1,22 @@
+{% extends 'base.html' %} {% block head %} {{ super() }}
+<meta name="robots" content="noindex, nofollow" />
+{% endblock %} {% block title %}管理儀表板{% endblock %} {% block content %}
+<div class="dashboard-container">
+  <h1>管理儀表板</h1>
+
+  <div class="dashboard-menu">
+    <h2>內容管理</h2>
+    <ul>
+      <li><a href="{{ url_for('dashboard.new_post') }}">新增文章</a></li>
+      <li><a href="#">文章列表</a></li>
+      <li><a href="#">標籤管理</a></li>
+      <li><a href="#">頁面管理</a></li>
+    </ul>
+
+    <h2>系統</h2>
+    <ul>
+      <li><a href="{{ url_for('auth.logout') }}">登出</a></li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

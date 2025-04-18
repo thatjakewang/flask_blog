@@ -2,6 +2,9 @@ from app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, BooleanField, SelectMultipleField, SubmitField
+from wtforms.validators import DataRequired, Length, Regexp
 
 
 post_tags = db.Table('post_tags',
@@ -22,7 +25,10 @@ class Post(db.Model):
     title = db.Column(db.String(100), nullable=False)
     slug = db.Column(db.String(150), unique=True, nullable=False)
     content = db.Column(db.Text, nullable=False)
+    description = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    published = db.Column(db.Boolean, default=False)
 
     tags = db.relationship('Tag', secondary=post_tags, lazy='subquery',
                          backref=db.backref('posts', lazy=True))
@@ -35,7 +41,9 @@ class Page(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     slug = db.Column(db.String(100), unique=True, nullable=False)
+    published = db.Column(db.Boolean, default=False)
     order = db.Column(db.Integer, default=0) 
     in_menu = db.Column(db.Boolean, default=True)
     
@@ -52,3 +60,20 @@ class User(UserMixin, db.Model):
         
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+class PostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(min=1, max=100)])
+    slug = StringField('Slug', validators=[
+        DataRequired(),
+        Length(min=1, max=150),
+        Regexp(r'^[a-z0-9-]+$', message='Slug must contain only lowercase letters, numbers, and hyphens')
+    ])
+    description = TextAreaField('Description', validators=[Length(max=200)])
+    content = TextAreaField('Content', validators=[DataRequired()])
+    published = BooleanField('Publish')
+    tags = SelectMultipleField('Tags', coerce=int)
+    submit = SubmitField('Submit')
+
+    def populate_tags(self):
+        tags = Tag.query.order_by(Tag.name.asc()).all()
+        self.tags.choices = [(tag.id, tag.name) for tag in tags]

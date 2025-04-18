@@ -20,10 +20,11 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db) 
     
-    from app.routes import main, auth
+    from app.routes import main, auth, dashboard
     app.register_blueprint(main.bp)
-    app.register_blueprint(auth.bp, url_prefix='/management-portal-access')
-    
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(dashboard.bp)
+
     return app
 
 @login_manager.user_loader

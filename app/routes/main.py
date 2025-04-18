@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from app.models import Post, Page, Tag
+from flask_login import current_user
 from app import db
 
 bp = Blueprint('main', __name__)
@@ -17,9 +18,16 @@ def tag(slug):
 
 @bp.route('/<slug>')
 def dynamic_page(slug):
-    page = Page.query.filter_by(slug=slug).first()
+    page_query = Page.query.filter_by(slug=slug)
+    post_query = Post.query.filter_by(slug=slug)
+    
+    if not current_user.is_authenticated:
+        page_query = page_query.filter_by(published=True)
+        post_query = post_query.filter_by(published=True)
+    
+    page = page_query.first()
     if page:
         return render_template('page.html', page=page)
-    
-    post = Post.query.filter_by(slug=slug).first_or_404()
-    return render_template('post.html', post=post)
+
+    post = post_query.first_or_404()
+    return render_template('dashboard/post.html', post=post)
