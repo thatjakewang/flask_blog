@@ -1,25 +1,51 @@
-{% extends 'base.html' %} {% block head %} {{ super() }}
-<meta name="robots" content="noindex, nofollow" />
-{% endblock %} {% block title %}管理員登入{% endblock %} {% block content %}
-<div class="login-container">
-  <h1>管理員登入</h1>
-
-  {% with messages = get_flashed_messages() %} {% if messages %}
-  <div class="alert alert-danger">
-    {% for message in messages %} {{ message }} {% endfor %}
+{% extends 'base.html' %} {% block head %} {{ super() }} {% endblock %} {% block
+title %}管理員登入{% endblock %} {% block head_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/login.css') }}"
+/>
+<meta name="robots" content="noindex, nofollow" />{% endblock %} {% block
+content %}
+<main class="container">
+  <div class="login">
+    <form method="post">
+      <div class="form-group">
+        <input
+          type="text"
+          name="username"
+          id="username"
+          placeholder="Email"
+          required
+        />
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+      </div>
+      <div class="form-group">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Password"
+          required
+        />
+        <div class="input-icon">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+      </div>
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <p class="alert">
+        {% for message in messages %} {{ message }} {% endfor %}
+      </p>
+      {% endif %} {% endwith %}
+      <button type="submit" class="login-btn">Login</button>
+    </form>
   </div>
-  {% endif %} {% endwith %}
-
-  <form method="post">
-    <div class="form-group">
-      <label for="username">用戶名</label>
-      <input type="text" name="username" id="username" required />
-    </div>
-    <div class="form-group">
-      <label for="password">密碼</label>
-      <input type="password" name="password" id="password" required />
-    </div>
-    <button type="submit" class="login-btn">登入</button>
-  </form>
-</div>
+</main>
 {% endblock %}

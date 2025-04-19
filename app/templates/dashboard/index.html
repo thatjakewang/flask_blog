@@ -1,22 +1,26 @@
-{% extends 'base.html' %} {% block head %} {{ super() }}
+{% extends 'base.html' %} {% block head %} {{ super() }}{% endblock %} {% block
+head_styles %}
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='css/dashboard.css') }}"
+/>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <meta name="robots" content="noindex, nofollow" />
-{% endblock %} {% block title %}管理儀表板{% endblock %} {% block content %}
-<div class="dashboard-container">
-  <h1>管理儀表板</h1>
-
-  <div class="dashboard-menu">
-    <h2>內容管理</h2>
-    <ul>
-      <li><a href="{{ url_for('dashboard.new_post') }}">新增文章</a></li>
-      <li><a href="#">文章列表</a></li>
-      <li><a href="#">標籤管理</a></li>
-      <li><a href="#">頁面管理</a></li>
-    </ul>
-
-    <h2>系統</h2>
-    <ul>
-      <li><a href="{{ url_for('auth.logout') }}">登出</a></li>
-    </ul>
+{% endblock %} {% block title %}dashboard{% endblock %} {% block content %}
+<main>
+  <div class="dashboard">
+    <div class="dashboard_menu">
+      <ul>
+        <li class="active">
+          <a href="{{ url_for('dashboard.index')}}">Overview</a>
+        </li>
+        <li><a href="{{ url_for('dashboard.posts')}}">Posts</a></li>
+        <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+      </ul>
+    </div>
+    <div class="dashboard_content">
+      {% block dashboard_content %}{% endblock %}
+    </div>
   </div>
-</div>
+</main>
 {% endblock %}

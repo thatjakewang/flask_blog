@@ -8,6 +8,7 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/style.css') }}"
     />
+    {% block head_styles %}{% endblock %}
   </head>
   <body>
     <header>
@@ -15,9 +16,9 @@
         <h1>Jakedaily</h1>
       </div>
     </header>
-    <main class="contanier">{% block content %}{% endblock %}</main>
+    {% block content %}{% endblock %}
     <footer class="contanier">
-      <p>© {{ now.year }} Jakedaily</p>
+      <p>© {{ now.year }} Jake Wang</p>
     </footer>
   </body>
 </html>

@@ -1,0 +1,18 @@
+{% extends 'dashboard/index.html' %} {% block title %}All Posts - Jakedaily{%
+endblock %} {% block dashboard_content %}
+<div class="content_header">
+  <h1>Posts</h1>
+  <a href="{{ url_for('dashboard.new_post') }}">Add Posts</a>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Descripton</th>
+      <th>Categories</th>
+      <th>Tags</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+</table>
+{% endblock %}

@@ -16,7 +16,7 @@ def admin_login():
         user = User.query.filter_by(username=username).first()
         
         if user is None or not user.check_password(password):
-            flash('無效的用戶名或密碼')
+            flash('Invalid Email or password.')
             return redirect(url_for('auth.admin_login'))
         
         login_user(user)
