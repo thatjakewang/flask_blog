@@ -1,5 +1,16 @@
-__pycache__/
-venv/
-instance/
-*.db
+# macOS
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Flask
+instance/
+.env
+venv/
+
+# Git
+.git/

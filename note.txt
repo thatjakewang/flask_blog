@@ -1,4 +1,0 @@
-app/：包含應用程式核心邏輯（__init__.py、models/、routes/、static/、templates/）。
-instance/：存放實例特定的數據，如 SQLite 數據庫 blog.db。
-migrations/：管理數據庫遷移。
-venv/：虛擬環境。

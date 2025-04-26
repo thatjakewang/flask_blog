@@ -43,7 +43,7 @@
   align-items: center;
   gap: 24px;
 }
-.content_header h1 {
+h1 {
   font-size: 24px;
   font-weight: 500;
 }
@@ -76,4 +76,11 @@ td {
   border-bottom: 1px solid #e5e5e5;
   vertical-align: middle;
   word-break: break-word;
+}
+input,
+textarea {
+  padding: 8px;
+  margin: 8px 0;
+  width: 100%;
+  font-size: 17px;
 }

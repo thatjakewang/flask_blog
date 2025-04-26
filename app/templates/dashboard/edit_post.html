@@ -1,4 +1,4 @@
-{% extends 'dashboard/index.html' %} {% block title %}New Post - Jakedaily{%
+{% extends 'dashboard/index.html' %} {% block title %}Edit Post - Jakedaily{%
 endblock %} {% block head_styles %}
 <link
   rel="stylesheet"
@@ -22,6 +22,6 @@ endblock %} {% block head_styles %}
     {% endif %}
   </div>
   {% endfor %}
-  <div>{{ form.submit }}</div>
+  <div>{{ form.submit(value='Update Post') }}</div>
 </form>
 {% endblock %}

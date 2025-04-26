@@ -8,11 +8,29 @@ endblock %} {% block dashboard_content %}
   <thead>
     <tr>
       <th>Title</th>
-      <th>Descripton</th>
-      <th>Categories</th>
-      <th>Tags</th>
+      <th>Slug</th>
+      <th>Description</th>
       <th>Date</th>
+      <th>Edit</th>
     </tr>
   </thead>
+  <tbody>
+    {% for post in posts %}
+    <tr>
+      <td>{{ post.title }}</td>
+      <td>{{ post.slug }}</td>
+      <td>{{ post.description }}</td>
+      <td>{{ post.created_at.strftime('%Y-%m-%d')}}</td>
+      <td>
+        <a href="{{ url_for('dashboard.edit_post', id=post.id) }}">Edit</a>
+        <a
+          href="{{ url_for('dashboard.delete_post', id=post.id) }}"
+          onclick="return confirm('Are you sure you want to delete this post?')"
+          >Delete</a
+        >
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endblock %}
