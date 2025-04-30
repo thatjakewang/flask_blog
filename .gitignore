@@ -13,4 +13,4 @@ instance/
 venv/
 
 # Git
-.git/
+.git/.env

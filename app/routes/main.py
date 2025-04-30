@@ -5,9 +5,9 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('main/index.html')
 
 @bp.route('/<slug>', methods=['GET'])
 def post(slug):
     post = Post.query.filter_by(slug=slug).first_or_404()
-    return render_template('post.html', post=post)
+    return render_template('blog/post.html', post=post)
