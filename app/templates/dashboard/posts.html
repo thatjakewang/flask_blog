@@ -36,7 +36,7 @@
       </td>
       <td>
         {% if post.category %}
-          <a href="{{ url_for('main.category', category_name=post.category.name|lower) }}" target="_blank">
+          <a href="{{ url_for('main.category', slug=post.category.slug|lower) }}" target="_blank">
             {{ post.category.name }}
           </a>
         {% else %}

@@ -74,21 +74,21 @@ def post(slug):
     return render_template('blog/post.html', post=post)
 
 
-@main_bp.route('/category/<category_name>/')
-def category(category_name):
+@main_bp.route('/category/<string:slug>/')
+def category(slug):
     """顯示指定分類的文章"""
-    category_name = category_name.strip().lower()
+    category = Category.query.filter_by(slug=slug).first_or_404()
 
     # Redirect to lowercase URL for SEO
-    if category_name != category_name.lower():
-        return redirect(url_for('main.category', category_name=category_name.lower()), code=301)
+    if slug != slug.lower():
+        return redirect(url_for('main.category', slug=slug.lower()), code=301)
     
     # Query published posts in this category with pagination
     page = request.args.get('page', 1, type=int)
     per_page = 10
     pagination = Post.query.join(Category) \
         .filter(
-            func.lower(Category.name) == category_name,
+            func.lower(Category.slug) == slug.lower(),
             Post.status == 'published'
         ) \
         .order_by(Post.created_at.desc()) \
@@ -97,9 +97,7 @@ def category(category_name):
     posts = pagination.items
     if not posts:
         # Check if category exists at all (case-insensitive)
-        category_exists = Post.query.join(Category) \
-            .filter(func.lower(Category.name) == category_name) \
-            .first()
+        category_exists = Category.query.filter(func.lower(Category.slug) == slug.lower()).first()
         if not category_exists:
             abort(404)
     
@@ -109,7 +107,7 @@ def category(category_name):
         'main/category.html',
         posts=posts,
         pagination=pagination,
-        category_name=category_name,
+        category=category,   # 傳整個 category object 給 template，比單純 name 更彈性
         all_categories=all_categories,
         active_page='category'
     )
