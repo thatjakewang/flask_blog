@@ -54,7 +54,6 @@
           <li class="{% if active_page=='home' %}active{% endif %}">
             <a href="{{ url_for('main.index')}}" aria-label="Home">首頁</a>
           </li>
-          {% set available_categories = Category.query.all() %}
           {% if available_categories %}
             {% for cat in available_categories %}
             <li class="{% if active_page=='category' and category.slug==cat.slug %}active{% endif %}">
