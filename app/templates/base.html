@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Jakedaily{% endblock %}</title>
+  <title>{% block title %}Jakeblog{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Welcome to Jakedaily, your daily blog on programming and lifestyle.{% endblock %}">
 
   <!-- Main CSS file with versioning -->
@@ -16,13 +16,13 @@
       var script = document.createElement('script');
       script.async = true;
       script.defer = true;
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJ6BQ1X1WP';
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-VEM70SR4HV';
       document.head.appendChild(script);
 
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'G-NJ6BQ1X1WP');
+      gtag('config', 'G-VEM70SR4HV');
     });
   </script>
 
@@ -31,7 +31,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Jakedaily",
+    "name": "Jakeblog",
     "url": "{{ request.url_root }}",
     "logo": "{{ url_for('static', filename='images/logo.png', _external=True) }}",
     "sameAs": [
@@ -52,7 +52,7 @@
       <nav class="nav">
         <ul>
           <li class="{% if active_page=='home' %}active{% endif %}">
-            <a href="{{ url_for('main.index')}}" aria-label="Home">Home</a>
+            <a href="{{ url_for('main.index')}}" aria-label="Home">首頁</a>
           </li>
           {% set available_categories = Post.get_available_categories() %}
           {% if available_categories %}
