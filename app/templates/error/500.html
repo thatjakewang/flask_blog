@@ -1,4 +1,6 @@
-{% extends 'base.html' %} {% block title %} 500 {% endblock %} {% block content
-%}
-<p>Oops.</p>
-{% endblock %}
+{% extends 'error_base.html' %}
+{% set error_code = '500' %}
+{% set error_title = 'Internal Server Error' %}
+{% set error_color = '#dc3545' %}
+{% set error_message = "Something went wrong on our end. The issue has been logged and we're working to fix it. Please try again later." %}
+{% set show_chinese_link = false %}

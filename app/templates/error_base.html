@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ error_title }} - Jakedaily{% endblock %}
+{% block head_styles %}
+<meta name="robots" content="noindex, nofollow" />
+{% endblock %}
+{% block content %}
+<main class="container">
+  <div style="text-align: center; padding: 60px 16px; max-width: 500px; margin: 0 auto;">
+    <h1 style="font-size: 72px; color: {{ error_color }}; margin-bottom: 20px;">{{ error_code }}</h1>
+    <h2 style="font-size: 24px; color: #666; margin-bottom: 20px;">{{ error_title }}</h2>
+    <p style="font-size: 16px; color: #888; margin-bottom: 40px; line-height: 1.5;">{{ error_message }}</p>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('main.index') }}" style="background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 500;">Go Home</a>
+      {% if show_chinese_link %}
+      <a href="{{ url_for('main.index') }}" style="background-color: #6b7280; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 500;">回首頁</a>
+      {% endif %}
+    </div>
+  </div>
+</main>
+{% endblock %}

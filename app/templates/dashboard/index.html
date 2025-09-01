@@ -1,27 +1,63 @@
-{% extends 'base.html' %} {% block head %} {{ super() }}{% endblock %} {% block
-head_styles %}
-<link
-  rel="stylesheet"
-  href="{{ url_for('static', filename='css/dashboard.css') }}"
-/>
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-<meta name="robots" content="noindex, nofollow" />
-{% endblock %} {% block title %}Dashboard Overview - Jakedaily{% endblock %} {%
-block content %}
-<main>
+{% extends 'base.html' %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block head_styles %}
+  <meta name="robots" content="noindex, nofollow" />
+{% endblock %}
+
+{% block title %}Dashboard - Jakedaily{% endblock %}
+
+{% block content %}
+<main role="main">
   <div class="dashboard">
-    <div class="dashboard_menu">
+
+    <!-- 側邊選單 -->
+    <nav class="dashboard_menu" aria-label="Dashboard navigation">
       <ul>
-        <li class="active">
-          <a href="{{ url_for('dashboard.index')}}">Overview</a>
+        <li class="{% if sub_active == 'overview' %}active{% endif %}">
+          <a href="{{ url_for('dashboard.index') }}" {% if sub_active == 'overview' %}aria-current="page"{% endif %}>Overview</a>
         </li>
-        <li><a href="{{ url_for('dashboard.posts')}}">Posts</a></li>
-        <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        <li class="{% if sub_active == 'posts' %}active{% endif %}">
+          <a href="{{ url_for('dashboard.posts') }}" {% if sub_active == 'posts' %}aria-current="page"{% endif %}>Posts</a>
+        </li>
+        <li class="{% if sub_active == 'categories' %}active{% endif %}">
+          <a href="{{ url_for('dashboard.categories') }}">分類管理</a>
+        </li>
+        <li>
+          <a href="{{ url_for('auth.logout') }}"
+             onclick="return confirm('Are you sure you want to logout?');"
+             aria-label="Logout from Dashboard">Logout</a>
+        </li>
       </ul>
-    </div>
-    <div class="dashboard_content">
-      {% block dashboard_content %}{% endblock %}
-    </div>
+    </nav>
+
+    <!-- 主內容 -->
+    <section class="dashboard_content">
+      <!-- 統計卡片區 -->
+      <div class="stats_grid">
+        <div class="stat_card">
+          <h2>{{ posts_count }}</h2>
+          <p>Total Posts</p>
+        </div>
+        <div class="stat_card">
+          <h2>{{ drafts_count }}</h2>
+          <p>Drafts</p>
+        </div>
+        <div class="stat_card">
+          <h2>{{ categories_count }}</h2>
+          <p>Categories</p>
+        </div>
+      </div>
+
+      <!-- 內容區塊 (子模板覆寫) -->
+      <section class="dashboard_inner">
+        {% block dashboard_content %}{% endblock %}
+      </section>
+
+    </section>
   </div>
 </main>
 {% endblock %}

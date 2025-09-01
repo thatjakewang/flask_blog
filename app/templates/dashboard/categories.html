@@ -1,0 +1,64 @@
+{% extends 'dashboard/index.html' %}
+
+{% block dashboard_content %}
+<div class="content_header">
+  <h1>Categories</h1>
+  <div class="actions">
+    <a href="{{ url_for('dashboard.new_category') }}" class="btn btn-primary">+ Add Category</a>
+  </div>
+</div>
+
+<table class="dashboard_table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Posts Count</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cat in categories %}
+    <tr>
+      <td>
+        <strong>{{ cat.name }}</strong>
+      </td>
+      <td>
+        {{ cat.description or 'No description' }}
+      </td>
+      <td>
+        {% set post_count = cat.posts.count() %}
+        <span class="badge bg-secondary">{{ post_count }}</span>
+      </td>
+      <td>
+        <div class="action_menu">
+          {% if cat.is_default_category %}
+            <span class="action_btn" style="opacity: 0.5;" title="預設分類無法編輯">🔒 預設分類</span>
+          {% else %}
+            <a href="{{ url_for('dashboard.edit_category', id=cat.id) }}" class="action_btn">✏️ Edit</a>
+          {% endif %}
+          
+          {% if cat.is_default_category %}
+            <button class="delete_btn" disabled title="預設分類無法刪除">預設分類</button>
+          {% elif cat.posts.count() == 0 %}
+            <form method="POST" action="{{ url_for('dashboard.delete_category', id=cat.id) }}" style="display: inline;" onsubmit="return confirm('確定要刪除分類「{{ cat.name }}」嗎？');">
+              {% if csrf_enabled %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% endif %}
+              <button type="submit" class="delete_btn">刪除</button>
+            </form>
+          {% else %}
+            <button class="delete_btn" disabled title="此分類下有 {{ cat.posts.count() }} 篇文章，無法刪除">無法刪除</button>
+          {% endif %}
+        </div>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="muted">No categories found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

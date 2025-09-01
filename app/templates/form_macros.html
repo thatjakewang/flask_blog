@@ -1,0 +1,41 @@
+{% macro render_field(field, label=None, placeholder=None, rows=None, cols=None, class_=None) %}
+  <div class="form_group">
+    {% if label %}
+      <label for="{{ field.id }}">{{ label }}</label>
+    {% endif %}
+
+    {% set css_class = "form-control" %}
+    {% if field.errors %}
+      {% set css_class = css_class + " is-invalid" %}
+    {% endif %}
+
+    {% set field_kwargs = {} %}
+    {% if rows %}
+      {% set _ = field_kwargs.update({'rows': rows}) %}
+    {% endif %}
+    {% if cols %}
+      {% set _ = field_kwargs.update({'cols': cols}) %}
+    {% endif %}
+    {% if class_ %}
+      {% set _ = field_kwargs.update({'class': class_}) %}
+    {% endif %}
+
+    {% if placeholder %}
+      {{ field(id=field.id, placeholder=placeholder, class=css_class, **field_kwargs) }}
+    {% else %}
+      {{ field(id=field.id, class=css_class, **field_kwargs) }}
+    {% endif %}
+
+    {% if field.errors %}
+      <div class="invalid-feedback">
+        {% for error in field.errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro render_field_with_validation(field, label, placeholder=None, rows=None, cols=None, class_=None) %}
+  {{ render_field(field, label=label, placeholder=placeholder, rows=rows, cols=cols, class_=class_) }}
+{% endmacro %}

@@ -1,24 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Jakedaily{% endblock %}</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-    {% block head_styles %}{% endblock %}
-  </head>
-  <body>
-    <header>
-      <div class="nav_logo contanier">
-        <h1>Jakedaily</h1>
-      </div>
-    </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Jakedaily{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Welcome to Jakedaily, your daily blog on programming and lifestyle.{% endblock %}">
+
+  <!-- Main CSS file with versioning -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=now.timestamp()) }}">
+  <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
+
+  <!-- Google Analytics (deferred loading) -->
+  <script nonce="{{ g.csp_nonce }}">
+    window.addEventListener('load', function() {
+      var script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-NJ6BQ1X1WP';
+      document.head.appendChild(script);
+
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NJ6BQ1X1WP');
+    });
+  </script>
+
+  <!-- JSON-LD for Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Jakedaily",
+    "url": "{{ request.url_root }}",
+    "logo": "{{ url_for('static', filename='images/logo.png', _external=True) }}",
+    "sameAs": [
+      "https://twitter.com/thejakewang"
+    ],
+    "founder": {
+      "@type": "Person",
+      "name": "Jake Wang"
+    }
+  }
+  </script>
+
+  {% block head_styles %}{% endblock %}
+</head>
+<body>
+  <header class="header">
+    <div class="container header_grid">
+      <nav class="nav">
+        <ul>
+          <li class="{% if active_page=='home' %}active{% endif %}">
+            <a href="{{ url_for('main.index')}}" aria-label="Home">Home</a>
+          </li>
+          {% set available_categories = Post.get_available_categories() %}
+          {% if available_categories %}
+          {% for category in available_categories %}
+          <li class="{% if active_page=='category' and category_name==category %}active{% endif %}">
+            <a href="{{ url_for('main.category', category_name=category) }}" aria-label="{{ category|capitalize }}">{{ category|capitalize }}</a>
+          </li>
+          {% endfor %}
+          {% endif %}
+          {% if current_user.is_authenticated %}
+          <li class="{% if active_page=='dashboard' %}active{% endif %}">
+            <a href="{{ url_for('dashboard.index') }}" aria-label="Dashboard">Dashboard</a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
     {% block content %}{% endblock %}
-    <footer class="contanier">
-      <p>© {{ now.year }} Jake Wang</p>
-    </footer>
-  </body>
+  </main>
+
+  <footer class="container">
+    <p>© {{ now.year }} Jake Wang</p>
+  </footer>
+</body>
 </html>

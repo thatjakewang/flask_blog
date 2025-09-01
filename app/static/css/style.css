@@ -1,37 +1,641 @@
-* {
+/* =================================
+   RESET & BASE STYLES
+   ================================= */
+
+*, *::before, *::after {
   box-sizing: border-box;
-  margin: 0;
   padding: 0;
-}
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.container {
-  max-width: 680px;
-  width: 100%;
-  margin: 0 auto;
-}
-header {
-  border-bottom: 1px solid #f0f0f0;
-  padding: 16px 0;
-}
-.nav_logo {
-  padding: 16px 0;
-  text-align: center;
-}
-.nav_logo h1 {
-  text-transform: uppercase;
+  margin: 0;
 }
 
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  background-color: #EFF6FF;
+}
+
+.code{
+    background-color: #f4f4f4;
+    padding: 3px 6px;
+    color: #c7254e;
+}
+
+.container{
+  max-width: 900px;
+  width: 100%;
+  margin:  0 auto;
+}
+details {
+  margin-bottom: 10px;
+}
+details summary{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  padding: 16px 32px;
+  color: #333333;
+  background-color: #edf2f9;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+details summary::marker{
+  display: none;
+}
+details summary::after{
+    transform: translateY(-25%) rotate(45deg);
+    width: 7px;
+    height: 7px;
+    margin-left: 10px;
+    border-bottom: 3px solid #333333b3;
+    border-right: 3px solid #333333b3;
+    content: '';
+    transition: transform .3s;
+}
+details[open] summary::after{
+  transform: rotate(225deg);
+}
+details ul{
+  margin: 0 32px;
+}
+/* =================================
+   LAYOUT COMPONENTS
+   ================================= */
+
+/* Header */
+header{
+  padding: 32px 0;
+  border-bottom: 1px #f0f0f0 solid;
+  background-color: #374151;
+}
+
+.nav{
+  width: 100%;
+}
+
+.nav ul{
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.nav ul a{
+  color:#fff;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.nav ul a:hover {
+  background-color: rgba(51, 51, 51, 0.1);
+  color: #000;
+}
+
+.nav ul .active a {
+  background-color: #333;
+  color: #fff;
+}
+
+.nav_logo{
+  margin-bottom: 16px;
+}
+
+.nav_logo a{
+  display: block;
+  max-width: 250px;
+  margin: 0 auto;
+}
+
+.nav_logo a img{
+  max-width: 250px;
+}
+
+/* Footer */
 footer {
   height: 80px;
   padding: 32px 0;
   text-align: center;
+  margin: 80px auto 0!important;
+}
+
+/* =================================
+   PAGE SPECIFIC STYLES
+   ================================= */
+
+/* --- HOME PAGE --- */
+.published {
+  list-style: none;
+  padding: 16px;
+}
+
+.published_post {
+  padding: 40px 0;
+  border-bottom: 1px #f0f0f0 solid;
+}
+
+.thumbnail {
+  display: none;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.post_detail {
+  flex: 1;
+}
+
+.post_detail h2 {
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+
+.post_detail h2 a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 900;
+}
+
+.post_detail p {
+  font-size: 17px;
+}
+
+/* --- ARTICLE/POST PAGE --- */
+article {
+  padding: 16px;
+}
+
+article h1{
+  color: #374151;
+  font-size: 28px;
+  margin-bottom: 40px;
+}
+
+article h2 {
+  margin-top: 40px;
+  margin-bottom: 20px;
+  font-size: 22px;
+  color: #374151;
+  position: relative;
+  padding:10px 0 9px 15px;
+}
+article h2::after{
+  position: absolute;
+  content: "";
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  border-bottom: 4px solid #374151;
+  border-radius: 20px;
+}
+
+article h3{
+  margin-top: 40px;
+  margin-bottom: 20px;
+  padding: 0px 6px;
+  font-size: 20px;
+  border-left: 6px solid #374151;
+  color: #777;
+}
+
+article p {
+  font-size: 18px;
+  margin-bottom: 30px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.9;
+  color: #505050;
+}
+
+article img {
+  margin-bottom: 40px;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+article ul{
+  padding: 16px;
+  line-height: 2;
+}
+
+article ul li{
+  color: #505050;
+}
+
+article ul li a{
+  color:#000eee;
+  text-decoration: none;
+}
+
+.checklist{
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+.checklist li{
+  position: relative;
+  padding: 0.8rem 0 0.8rem 2.8rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+.checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0.5rem;
+  top: 0.8rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: #48bb78;
+  color: white;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+/* =================================
+   CODE SYNTAX HIGHLIGHTING
+   ================================= */
+
+pre {
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  padding: 16px;
+  font-family: monospace;
+  overflow-x: auto;
+  margin-bottom: 30px;
+}
+
+pre code{
+  color: #d4d4d4;
+  font-size: 16px;
+}
+
+pre .comment{
+  color: #6a9955;
+}
+
+pre .keyword {
+  color: #569cd6;
+}
+
+pre .string {
+  color: #ce9178;
+}
+
+pre .function {
+  color: #dcdcaa;
+}
+
+pre .variable {
+  color: #9cdcfe;
+}
+
+/* =================================
+   DASHBOARD STYLES
+   ================================= */
+
+/* Dashboard Layout */
+.dashboard {
+  max-width: 1920px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  flex: 1 1 0%;
+  flex-direction: row;
+}
+
+.dashboard_menu ul {
+  list-style: none;
+  max-width: 200px;
+  min-width: 200px;
+  width: 100%;
+  padding: 8px;
+}
+
+.dashboard_menu ul li {
+  cursor: pointer;
+}
+
+.dashboard_menu ul li:hover {
+  background-color: rgba(46, 60, 86, 0.07);
+}
+
+.dashboard_menu ul li a {
+  text-decoration: none;
+  display: inline-block;
+  padding: 4px 4px 4px 8px;
+  width: 100%;
+  color: #333;
+}
+
+.active {
+  background-color: rgba(46, 60, 86, 0.07);
+}
+
+.dashboard_content {
+  width: 100%;
+  padding: 16px;
+}
+
+/* Dashboard Content Header */
+.content_header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Dashboard h1 overrides base h1 */
+.dashboard h1 {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0;
+  text-align: left;
+  max-width: none;
+}
+
+.content_header a {
+  text-decoration: none;
+  border: 1px solid #333;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 15px;
+  color: #333;
+}
+
+/* =================================
+   FORM ELEMENTS
+   ================================= */
+
+input,
+textarea {
+  padding: 8px;
+  margin: 8px 0;
+  width: 100%;
+  font-size: 17px;
+}
+
+/* =================================
+   EDITOR LAYOUT
+   ================================= */
+
+.editor {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px;
+}
+
+.main_editor {
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar_editor {
+  width: 250px;
+}
+
+.button_group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.button_group button {
+  font-size: 18px;
+  padding: 8px 0;
+  border: none;
+  cursor: pointer;
+}
+
+/* =================================
+   BUTTON STYLES
+   ================================= */
+
+.action_btn {
+  border: #333 1px solid;
+  padding: 6px 16px;
+  color: #333;
+}
+
+.action_btn:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+.delete_btn {
+  border: #dc3545 1px solid;
+  color: #dc3545;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.delete_btn:hover {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Dashboard Button Styles */
+#publish {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+#preview {
+  background-color: #2196f3;
+  color: #fff;
+}
+
+#save {
+  background-color: #ff5722;
+  color: #fff;
+}
+
+/* =================================
+   TABLE STYLES
+   ================================= */
+
+table {
+  width: 100%;
+  margin: 40px 0;
+  table-layout: fixed;
+  border: 1px solid #c3c4c7;
+  border-collapse: collapse;
+  color: #333;
+}
+
+table a {
+  text-decoration: none;
+  color: #2196f3;
+}
+
+th {
+  padding: 8px;
+  font-weight: 500;
+  background-color: rgba(46, 60, 86, 0.07);
+  text-align: left;
+  border-bottom: 1px solid #c3c4c7;
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #e5e5e5;
+  vertical-align: middle;
+  word-break: break-word;
+}
+
+th:first-of-type {
+  width: 450px;
+}
+
+/* =================================
+   AUTHENTICATION STYLES
+   ================================= */
+
+/* Login Page */
+.login {
+  height: 65vh;
+}
+
+.login form {
+  width: 100%;
+  max-width: 500px;
+  padding: 36px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin: 60px auto;
+  font-size: 16px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.login label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.login input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  color: #1f2937;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.login input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+}
+
+.input-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.alert {
+  color: red;
+  padding-bottom: 16px;
+  text-align: center;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 16px;
+  background-color: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* =================================
+   RESPONSIVE DESIGN
+   ================================= */
+
+@media screen and (min-width: 680px) {
+  /* Main page responsive styles */
+  .published_post {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items:center;
+  }
+
+  .thumbnail {
+    display: block;
+    max-width: 200px;
+  }
+
+  .published {
+    padding: 0;
+  }
+
+  /* Article/Post page responsive styles */
+
+  article {
+    max-width: 900px;
+    margin: 60px auto;
+    background-color: #fff;
+    padding: 32px 48px;
+  }
+
+  .nav ul{
+    justify-content: flex-start;
+  }
+
+  /* 分類導航響應式優化 */
+  .nav ul li {
+    flex-shrink: 0;
+  }
+
+  .nav ul a {
+    white-space: nowrap;
+    font-size: 18px;
+  }
 }

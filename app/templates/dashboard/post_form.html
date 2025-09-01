@@ -1,0 +1,45 @@
+{% from 'form_macros.html' import render_field_with_validation %}
+{% extends 'dashboard/index.html' %}
+{% block title %}{{ 'Edit Post' if post else 'New Post' }} - Jakedaily{% endblock %}
+
+{% block dashboard_content %}
+<form method="POST" novalidate>
+  {{ form.hidden_tag() }}
+
+  <div class="editor">
+    <!-- 主編輯區 -->
+    <div class="main_editor">
+      <h1>{{ 'Edit Post' if post else 'Add Post' }}</h1>
+
+      {{ render_field_with_validation(form.title, "Title", placeholder="Add Title") }}
+      {{ render_field_with_validation(form.slug, "Slug", placeholder="Slug") }}
+      {{ render_field_with_validation(form.thumbnail, "Thumbnail URL", placeholder="Add thumbnail URL") }}
+      {{ render_field_with_validation(form.category, "Category") }}
+      {{ render_field_with_validation(form.description, "Description", placeholder="Description") }}
+      {{ render_field_with_validation(form.content, "Content", rows=20) }}
+    </div>
+
+    <!-- 側邊操作區 -->
+    <aside class="sidebar_editor">
+      <div class="button_group">
+        {% if post %}
+          <!-- 編輯模式按鈕 -->
+          {% if post.status == 'published' %}
+            {{ form.update(class="btn btn-primary", id="update") }}
+            {{ form.save(class="btn btn-secondary", id="save") }}
+          {% else %}
+            {{ form.save(class="btn btn-secondary", id="save") }}
+            {{ form.publish(class="btn btn-primary", id="publish") }}
+          {% endif %}
+          {{ form.preview(class="btn btn-info", id="preview", formtarget="_blank") }}
+        {% else %}
+          <!-- 新增模式按鈕 -->
+          {{ form.save(class="btn btn-secondary", id="save") }}
+          {{ form.preview(class="btn btn-info", id="preview", formtarget="_blank") }}
+          {{ form.publish(class="btn btn-primary", id="publish") }}
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+</form>
+{% endblock %}

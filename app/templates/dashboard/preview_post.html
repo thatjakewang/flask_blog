@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Preview: {{ post.title }} - Jakedaily{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/post.css') }}">
+{% endblock %}
+
+{% block content %}
+<main class="preview-post-container">
+  <header class="post-header">
+    <h1>{{ post.title }}</h1>
+    <div class="post-meta">
+      <span>📅 {{ post.created_at.strftime('%Y-%m-%d') }}</span>
+      {% if post.category %}
+      <span>🏷 {{ post.category }}</span>
+      {% endif %}
+    </div>
+    {% if post.thumbnail %}
+    <div class="post-thumbnail">
+      <img src="{{ post.thumbnail }}" alt="Preview: {{ post.title }}" loading="eager" fetchpriority="high">
+    </div>
+    {% endif %}
+  </header>
+
+  <article class="post-content">
+    {{ post.content | safe }}
+  </article>
+</main>
+{% endblock %}

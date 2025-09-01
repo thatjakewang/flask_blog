@@ -1,7 +1,101 @@
 {% extends 'base.html' %} {% block title %}{{ post.title }} - Jakedaily {%
-endblock %} {% block content %}
+endblock %} {% block head_styles %}
+<meta name="description" content="{{ post.description }}" />
+<link rel="canonical" href="{{ request.url }}" />
+<meta name="robots" content="index, follow" />
+<meta name="author" content="Jake Wang" />
+<!-- Open Graph (Facebook) 標籤 -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="{{ post.title }}" />
+<meta property="og:description" content="{{ post.description }}" />
+<meta
+  property="og:image"
+  content="{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}"
+/>
+<meta property="og:url" content="{{ request.url }}" />
+<meta property="og:site_name" content="Jakedaily" />
+<meta property="og:locale" content="zh_TW" />
+<meta property="article:author" content="Jake Wang" />
+<meta
+  property="article:published_time"
+  content="{{ post.created_at.isoformat() if post.created_at else '' }}"
+/>
+{% if post.updated_at %}
+<meta
+  property="article:modified_time"
+  content="{{ post.updated_at.isoformat() }}"
+/>
+{% endif %}
+<!-- X Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@thejakewang" />
+<meta name="twitter:creator" content="@thejakewang" />
+<meta name="twitter:title" content="{{ post.title }}" />
+<meta name="twitter:description" content="{{ post.description }}" />
+<meta
+  name="twitter:image"
+  content="{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}"
+/>
+
+<!-- LCP Image Preload for Performance -->
+{% if post.thumbnail %}
+<link rel="preload" 
+      href="{{ url_for('static', filename='images/' + post.thumbnail) }}" 
+      as="image" 
+      fetchpriority="high">
+{% endif %}
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ post.title }}",
+  "description": "{{ post.description }}",
+  "image": "{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}",
+  "author": {
+    "@type": "Person",
+    "name": "Jake Wang",
+    "url": "{{ request.url_root }}",
+    "sameAs": [
+      "https://twitter.com/thejakewang",
+      "https://linkedin.com/in/thejakewang"
+    ]
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Jakedaily",
+    "url": "{{ request.url_root }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.url_root }}{{ url_for('static', filename='images/logo.png')[1:] }}"
+    }
+  },
+  "datePublished": "{{ post.created_at.isoformat() if post.created_at else '' }}",
+  {% if post.updated_at %}"dateModified": "{{ post.updated_at.isoformat() }}",{% endif %}
+  "url": "{{ request.url }}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.url }}"
+  },
+  "articleSection": "Technology",
+  "keywords": "{{ post.title.split()[:5] | join(', ') }}"
+}
+</script>
+{% endblock %}{% block content %}
 <main>
-  <h1>{{ post.title }}</h1>
-  <div>{{ post.content | safe }}</div>
+  <article role="article">
+    <h1>{{ post.title }}</h1>
+    {% if post.thumbnail %}
+    <img
+      src="{{ url_for('static', filename='images/' + post.thumbnail) }}"
+      alt="Featured image for article: {{ post.title }}"
+      width="1020"
+      height="585"
+      fetchpriority="high"
+      loading="eager"
+    />
+    {% endif %}{{ post.content | safe }}
+  </article>
 </main>
 {% endblock %}

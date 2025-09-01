@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title or 'Jakedaily' }} - Jakedaily{% endblock %}
+
+{% block head_styles %}
+<link rel="canonical" href="{{ request.url }}" />
+<meta name="robots" content="index, follow" />
+<meta name="description" content="{{ meta_description or 'Jake Wang\'s personal tech blog covering web development, programming, and technology insights.' }}" />
+
+<!-- Preload first post image for LCP optimization -->
+{% if posts and posts[0].thumbnail %}
+<link rel="preload" 
+      href="{{ url_for('static', filename='images/' + posts[0].thumbnail) }}" 
+      as="image" 
+      fetchpriority="high">
+{% endif %}
+
+<!-- JSON-LD for Blog/Category Page -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "{% if is_category %}Blog{% else %}Website{% endif %}",
+  "name": "{{ structured_data_name or 'Jakedaily' }}",
+  "url": "{{ request.url }}",
+  "description": "{{ structured_data_description or 'Jake Wang\'s personal tech blog covering web development, programming, and technology insights.' }}",
+  "author": {
+    "@type": "Person",
+    "name": "Jake Wang"{% if not is_category %},
+    "sameAs": [
+      "https://twitter.com/thejakewang",
+      "https://linkedin.com/in/thejakewang"
+    ]{% endif %}
+  }{% if not is_category %},
+  "publisher": {
+    "@type": "Organization",
+    "name": "Jakedaily",
+    "url": "{{ request.url_root }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.url_root }}{{ url_for('static', filename='images/logo.png')[1:] }}"
+    }
+  },
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ request.url_root }}search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }{% endif %}{% if posts %},
+  "blogPost": [
+    {% for post in posts %}
+    {
+      "@type": "BlogPosting",
+      "headline": "{{ post.title }}",
+      "description": "{{ post.description }}",
+      {% if post.thumbnail %}"image": "{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] }}",{% endif %}
+      "url": "{{ request.url_root }}{{ url_for('main.post', slug=post.slug or 'untitled-' + post.id|string)[1:] }}",
+      "datePublished": "{{ post.created_at.isoformat() if post.created_at else '' }}",
+      "author": {
+        "@type": "Person",
+        "name": "Jake Wang"
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]{% endif %}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<main class="container">
+  {% if page_heading %}
+  <h1>{{ page_heading }}</h1>
+  {% endif %}
+  
+  {% if not posts %}
+  <div class="no-posts">
+    {% if is_category %}
+    <h3>No posts found in this category</h3>
+    <p>Check back later for new content!</p>
+    <a href="{{ url_for('main.index') }}">Back to Home</a>
+    {% else %}
+    <p>No posts available at the moment. Please check back later.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  {% if posts %}
+  <ul class="published" role="list">
+    {% for post in posts %}
+    <li class="published_post">
+      {% if post.thumbnail %}
+      <div class="thumbnail">
+        <a href="{{ url_for('main.post', slug=post.slug or 'untitled-' + post.id|string) }}"{% if is_category %} aria-label="Read {{ post.title or 'Untitled' }}"{% endif %}>
+          <img
+            src="{{ url_for('static', filename='images/' + (post.thumbnail or 'default-thumbnail.png')) }}"
+            alt="{% if is_category %}{{ post.title }} thumbnail{% else %}Thumbnail for {{ post.title }}{% endif %}"
+            width="200"
+            height="115"
+            {% if loop.first %}fetchpriority="high" loading="eager"{% else %}loading="lazy"{% endif %}
+          />
+        </a>
+      </div>
+      {% endif %}
+      <div class="post_detail">
+        <h2>
+          <a href="{{ url_for('main.post', slug=post.slug or 'untitled-' + post.id|string) }}"
+            >{{ post.title or 'Untitled' }}</a
+          >
+        </h2>
+        <p>{{ post.description }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</main>
+{% endblock %}

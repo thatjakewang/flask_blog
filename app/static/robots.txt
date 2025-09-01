@@ -1,0 +1,24 @@
+# Robots.txt for Jakedaily Blog
+# https://jakedaily.com/robots.txt
+
+User-agent: *
+Allow: /
+
+# Block access to admin/dashboard areas
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /login/
+
+# Block access to private files
+Disallow: /static/js/
+Disallow: /*.log$
+
+# Allow access to important resources
+Allow: /static/css/
+Allow: /static/images/
+
+# Sitemap location
+Sitemap: https://jakedaily.com/sitemap.xml
+
+# Crawl delay (optional - prevents overloading)
+Crawl-delay: 1

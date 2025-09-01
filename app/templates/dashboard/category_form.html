@@ -1,0 +1,53 @@
+{% from 'form_macros.html' import render_field_with_validation %}
+{% extends 'dashboard/index.html' %}
+{% block title %}{{ 'Edit Category' if category else 'New Category' }} - Jakedaily{% endblock %}
+
+{% block dashboard_content %}
+<form method="POST" novalidate>
+  {{ form.hidden_tag() }}
+
+  <div class="editor">
+    <!-- 主編輯區 -->
+    <div class="main_editor">
+      <h1>{{ 'Edit Category' if category else 'Add Category' }}</h1>
+
+      {{ render_field_with_validation(form.name, "Name", placeholder="Category Name") }}
+      {{ render_field_with_validation(form.slug, "Slug", placeholder="category-slug") }}
+      {{ render_field_with_validation(form.description, "Description", placeholder="Category Description (Optional)", rows=5) }}
+    </div>
+
+    <!-- 側邊操作區 -->
+    <aside class="sidebar_editor">
+      <div class="button_group">
+        <a href="{{ url_for('dashboard.categories') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class="btn btn-primary") }}
+      </div>
+    </aside>
+  </div>
+</form>
+
+<!-- 刪除分類表單（僅編輯模式顯示） -->
+{% if category and not category.is_default_category %}
+<div style="margin-top: 2rem; padding: 1rem; border: 1px solid #dc3545; border-radius: 5px; background-color: #f8f9fa;">
+  <h6 style="color: #dc3545; margin-bottom: 1rem;">⚠️ 危險操作</h6>
+  <p style="margin-bottom: 1rem; font-size: 0.9em; color: #666;">
+    刪除分類 "{{ category.name or 'Unknown' }}" 將無法復原。
+    {% if category.total_post_count > 0 %}
+    <br><strong>此分類下的 {{ category.total_post_count }} 篇文章將自動移至 "Uncategorized" 分類。</strong>
+    {% else %}
+    <br>此分類下沒有文章。
+    {% endif %}
+  </p>
+  <form method="POST" action="{{ url_for('dashboard.delete_category', id=category.id) }}" style="margin: 0;" onsubmit="return confirm('確定要刪除分類「{{ category.name or 'Unknown' }}」嗎？{% if category.total_post_count > 0 %}\n\n此分類下的 {{ category.total_post_count }} 篇文章將移至 Uncategorized 分類。{% endif %}\n\n此操作無法復原！');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-danger btn-sm">
+      🗑️ 刪除分類
+      {% if category.total_post_count > 0 %}
+      ({{ category.total_post_count }} 篇文章將移至 Uncategorized)
+      {% endif %}
+    </button>
+    <a href="{{ url_for('dashboard.categories') }}" class="btn btn-secondary btn-sm">取消</a>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

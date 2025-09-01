@@ -1,46 +1,175 @@
+"""
+Form Classes for Blog Application
+
+This module contains the form classes used throughout the blog application,
+built on Flask-WTF and WTForms. It provides form validation, sanitization,
+and HTML cleaning capabilities.
+
+The forms include:
+    - PostForm: For creating and editing blog posts with secure HTML content
+    - LoginForm: For user authentication
+"""
 from flask import current_app
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField,PasswordField
-from wtforms.validators import DataRequired, Length, Regexp, ValidationError,Email
-from lxml import html
+from wtforms import StringField, TextAreaField, SubmitField, PasswordField, SelectField
+from wtforms.validators import DataRequired, Length, Regexp, ValidationError, Email, Optional
 from lxml.etree import ParserError
 import bleach
-from bleach.sanitizer import Cleaner
+from app.utils import ALLOWED_HTML_TAGS
+from flask_login import current_user
+from app.models import Category
+from app import cache
 
 class PostForm(FlaskForm):
 
-    cleaner = Cleaner(
-        tags=['p', 'strong', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3'],
-        attributes={'a': ['href', 'title']},
-        strip=True
-    )
+    def __init__(self, original_post=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_post = original_post
+        self.is_edit_mode = original_post is not None
+        # 分類選項將在路由中設定
 
     title = StringField('Title', validators=[DataRequired(), Length(max=200)])
     slug = StringField('Slug', validators=[
         DataRequired(),
         Length(max=60),
-        Regexp(r'^[a-z0-9-]+$')
+        Regexp(r'^[a-z0-9-]+$', message='網址代碼只能包含小寫字母、數字和連字號')
+    ])
+    thumbnail = StringField('Thumbnail', validators=[
+        Optional(),
+        Length(max=500),
+        Regexp(r'^[a-zA-Z0-9_\-\.]+$', message='檔案名稱只能包含字母、數字、底線、連字號和點')
     ])
     description = TextAreaField('Description', validators=[Length(max=160)])
     content = TextAreaField('Content', validators=[DataRequired()])
-    submit = SubmitField('Save Post')
+    category = SelectField('Category', coerce=int, validators=[Optional()])
+    
+    # 修復：在類別層級定義所有按鈕，避免動態創建
+    save = SubmitField('Save as Draft')
+    update = SubmitField('Save')
+    preview = SubmitField('Preview')
+    publish = SubmitField('Publish')
+    
+    # 修復：使用自定義屬性過濾函數
+    def _custom_attribute_filter(self, tag, name, value):
+        """
+        自定義屬性過濾函數，用於 bleach.clean()
+        """
+        # 允許基本屬性
+        if name in ['class', 'id', 'alt']:
+            return True
+        
+        # 處理 img 標籤的 src 屬性
+        if tag == 'img' and name == 'src':
+            if not isinstance(value, str):
+                return False
+            trusted_domains = ['https://jake.tw','/static/']
+            return any(value.startswith(domain) for domain in trusted_domains)
+        
+        # 處理 a 標籤的 href 屬性  
+        if tag == 'a' and name == 'href':
+            if not isinstance(value, str):
+                return False
+            return value.startswith(('http://', 'https://'))
+        
+            # Allow boolean "open" attribute on <details>
+            # bleach passes attribute name for boolean attributes; ensure we keep it
+            if tag == 'details' and name == 'open':
+                return True
+        
+        return False
+
+    def _update_category_choices(self):
+        """更新分類選項，每次都從資料庫重新載入"""
+        try:
+            # 先找出 Uncategorized 分類
+            uncategorized = Category.query.filter_by(slug='uncategorized').first()
+            other_categories = Category.query.filter(Category.slug != 'uncategorized').order_by(Category.name).all()
+            
+            # 將 Uncategorized 放在第一位（除了 Select Category）
+            choices = [(0, 'Select Category')]
+            if uncategorized:
+                choices.append((uncategorized.id, uncategorized.name))
+            choices.extend([(cat.id, cat.name) for cat in other_categories])
+            
+            self.category.choices = choices
+            
+            # 更新快取
+            if current_app:
+                cache.set('blog_category_choices', choices, timeout=current_app.config.get('CATEGORY_CACHE_TIMEOUT', 300))
+            
+            if current_app:
+                current_app.logger.info(f"Updated category choices: {choices}")
+            
+        except Exception as e:
+            user_id = current_user.id if current_user.is_authenticated else "Anonymous"
+            if current_app:
+                current_app.logger.error(f"Failed to load categories: {e}. User ID: {user_id}")
+            self.category.choices = [(0, 'Select Category')]
+
+    def _get_category_choices(self):
+        # 保留這個方法以向後相容，但改為呼叫新的更新方法
+        self._update_category_choices()
+        return self.category.choices
 
     def validate_slug(self, field):
         from app.models import Post
-        if Post.query.filter_by(slug=field.data).first():
-            raise ValidationError('別名已存在。')
+        field.data = field.data.lower()
+
+        post = Post.query.filter_by(slug=field.data).first()
+
+        if post and (not self.original_post or post.id != self.original_post.id):
+            raise ValidationError('此網址代碼已存在，請選擇其他代碼。')
 
     def validate_content(self, field):
+        if len(field.data) > 100000:
+            raise ValidationError('內容過長，請縮短內容。')
+        
         try:
-            html.fromstring(field.data)
-            field.data = self.cleaner.clean(field.data)
+            # 使用自定義屬性過濾函數進行清理
+            cleaned_content = bleach.clean(
+                field.data,
+                tags=ALLOWED_HTML_TAGS,
+                attributes=self._custom_attribute_filter,
+                protocols=['http', 'https'],
+                strip=True
+            )
+            field.data = cleaned_content
+            
         except ParserError:
-            raise ValidationError('Invalid HTML format.')
+            raise ValidationError('HTML格式不正確。')
         except Exception as e:
-            current_app.logger.error(f"Content validation error{e}")
-            raise ValidationError('無法處理內容。')
+            current_app.logger.error(f"Content validation error: {e}")
+            raise ValidationError(f'內容處理錯誤：{str(e)} 請檢查 HTML 格式。')
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    email = StringField('Email', validators=[
+        DataRequired(message="電子郵件為必填欄位。"),
+        Email(message="電子郵件格式不正確。")
+    ])
+    password = PasswordField('Password', validators=[DataRequired(message="密碼為必填欄位。")])
     submit = SubmitField('Login')
+
+class CategoryForm(FlaskForm):
+    def __init__(self, original_category=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_category = original_category
+
+    name = StringField('分類名稱', validators=[DataRequired(), Length(max=50)])
+    slug = StringField('Slug', validators=[
+        DataRequired(),
+        Length(max=60),
+        Regexp(r'^[a-z0-9-]+$', message='網址代碼只能包含小寫字母、數字和連字號')
+    ])
+    description = TextAreaField('分類描述', validators=[Length(max=200)])
+    submit = SubmitField('儲存')
+
+    def validate_slug(self, field):
+        """驗證 slug 是否唯一"""
+        from app.models import Category
+        existing_category = Category.query.filter_by(slug=field.data).first()
+        
+        # 如果是編輯模式，排除當前分類
+        if existing_category:
+            if self.original_category and existing_category.id == self.original_category.id:
+                return  # 允許保持相同的 slug
+            raise ValidationError('此 slug 已被使用，請選擇其他 slug。')
