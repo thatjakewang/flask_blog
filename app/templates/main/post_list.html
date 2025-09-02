@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ page_title or 'Jakedaily' }} - Jakedaily{% endblock %}
+{% block title %}{{ page_title or 'Jakeblog' }} - Jakeblog{% endblock %}
 
 {% block head_styles %}
 <link rel="canonical" href="{{ request.url }}" />
@@ -20,7 +20,7 @@
 {
   "@context": "https://schema.org",
   "@type": "{% if is_category %}Blog{% else %}Website{% endif %}",
-  "name": "{{ structured_data_name or 'Jakedaily' }}",
+  "name": "{{ structured_data_name or 'Jakeblog' }}",
   "url": "{{ request.url }}",
   "description": "{{ structured_data_description or 'Jake Wang\'s personal tech blog covering web development, programming, and technology insights.' }}",
   "author": {
@@ -33,7 +33,7 @@
   }{% if not is_category %},
   "publisher": {
     "@type": "Organization",
-    "name": "Jakedaily",
+    "name": "Jakeblog",
     "url": "{{ request.url_root }}",
     "logo": {
       "@type": "ImageObject",
