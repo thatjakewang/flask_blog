@@ -2,10 +2,11 @@
 
 {% block title %}{{ page_title or 'Jakeblog' }} - Jakeblog{% endblock %}
 
+{% block meta_description %}{{ meta_description or 'Jake Wang\'s personal tech blog covering web development, programming, and technology insights.' }}{% endblock %}
+
 {% block head_styles %}
 <link rel="canonical" href="{{ request.url }}" />
 <meta name="robots" content="index, follow" />
-<meta name="description" content="{{ meta_description or 'Jake Wang\'s personal tech blog covering web development, programming, and technology insights.' }}" />
 
 <!-- Preload first post image for LCP optimization -->
 {% if posts and posts[0].thumbnail %}
