@@ -5,16 +5,14 @@ Public Routes Blueprint
 This module contains all public-facing routes including main pages, authentication,
 and sitemap functionality. These routes are accessible to all users without authentication.
 """
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, send_from_directory, Response, abort, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, send_from_directory, Response, abort, Flask
 from flask_login import login_user, logout_user, login_required, current_user
-from sqlalchemy import func, text
+from sqlalchemy import func
 from urllib.parse import urlparse
 from datetime import date
-import time
 
 from app.models import User, Post, Category
 from app.forms import LoginForm
-from app import db
 
 
 # ========================================
@@ -29,9 +27,6 @@ auth_bp = Blueprint('auth', __name__)
 
 # Sitemap routes
 sitemap_bp = Blueprint('sitemap', __name__)
-
-# Health check routes
-health_bp = Blueprint('health', __name__)
 
 
 # ========================================
@@ -234,107 +229,6 @@ def sitemap():
         mimetype='application/xml'
     )
 
-
-# ========================================
-# Health Check Routes
-# ========================================
-
-@health_bp.route('/health')
-def health_check() -> Response:
-    """基本健康檢查端點"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': time.time(),
-        'version': current_app.config.get('VERSION', '1.0.0')
-    })
-
-
-@health_bp.route('/health/detailed')
-def detailed_health_check() -> Response:
-    """詳細健康檢查端點，包括資料庫連線檢查"""
-    health_data = {
-        'status': 'healthy',
-        'timestamp': time.time(),
-        'version': current_app.config.get('VERSION', '1.0.0'),
-        'environment': current_app.config.get('ENV', 'unknown'),
-        'debug': current_app.debug
-    }
-    
-    # 檢查資料庫連線
-    try:
-        db.session.execute(text('SELECT 1'))
-        health_data['database'] = 'connected'
-        db_status = 'healthy'
-    except Exception as e:
-        health_data['database'] = f'error: {str(e)}'
-        db_status = 'unhealthy'
-        current_app.logger.error(f"資料庫健康檢查失敗：{e}")
-    
-    # 檢查快取系統
-    try:
-        from app import cache
-        cache.set('health_check_test', 'ok', timeout=5)
-        cache_test = cache.get('health_check_test')
-        if cache_test == 'ok':
-            health_data['cache'] = 'working'
-            cache.delete('health_check_test')
-        else:
-            health_data['cache'] = 'not_working'
-    except Exception as e:
-        health_data['cache'] = f'error: {str(e)}'
-        current_app.logger.error(f"快取健康檢查失敗：{e}")
-    
-    # 整體狀態
-    if db_status == 'unhealthy':
-        health_data['status'] = 'unhealthy'
-        return jsonify(health_data), 503
-    
-    return jsonify(health_data)
-
-
-@health_bp.route('/health/readiness')
-def readiness_check() -> Response:
-    """準備就緒檢查，用於 Kubernetes 或容器化環境"""
-    try:
-        # 檢查關鍵服務是否準備就緒
-        db.session.execute(text('SELECT 1'))
-        
-        # 檢查是否有基本資料（例如預設分類）
-        from app.models import Category
-        default_category = Category.query.filter_by(slug='uncategorized').first()
-        
-        if not default_category:
-            return jsonify({
-                'status': 'not_ready',
-                'message': '缺少預設分類',
-                'timestamp': time.time()
-            }), 503
-        
-        return jsonify({
-            'status': 'ready',
-            'timestamp': time.time(),
-            'version': current_app.config.get('VERSION', '1.0.0')
-        })
-        
-    except Exception as e:
-        current_app.logger.error(f"準備就緒檢查失敗：{e}")
-        return jsonify({
-            'status': 'not_ready',
-            'error': str(e),
-            'timestamp': time.time()
-        }), 503
-
-
-@health_bp.route('/health/liveness')
-def liveness_check() -> Response:
-    """存活檢查，用於 Kubernetes 或容器化環境"""
-    return jsonify({
-        'status': 'alive',
-        'timestamp': time.time(),
-        'uptime': time.time() - current_app.config.get('_app_start_time', time.time())
-    })
-
-
 # ========================================
 # Blueprint Registration Helper
 # ========================================
@@ -349,6 +243,5 @@ def register_public_blueprints(app: 'Flask') -> None:
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(sitemap_bp)
-    app.register_blueprint(health_bp)
     
     app.logger.info("所有公開路由藍圖已成功註冊")

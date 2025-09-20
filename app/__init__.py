@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import os
 import secrets
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 import pytz
+from flask import Flask
 
-from flask import Flask, g, request, redirect, render_template
+from flask import g, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -24,7 +27,7 @@ csrf = None
 login_manager.login_view = 'auth.admin_login'
 
 @login_manager.user_loader
-def load_user(user_id: str) -> 'User':
+def load_user(user_id: str) -> 'User':  # noqa: F821
     """為 Flask-Login 載入使用者"""
     from app.models import User
     try:

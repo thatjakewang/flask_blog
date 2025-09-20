@@ -9,7 +9,6 @@ from flask import current_app
 from flask_login import current_user
 from sqlalchemy.exc import IntegrityError
 from app.models import Post, db
-from app.utils import clean_html_content
 from app.services.category_service import CategoryService
 from app.services.statistics_service import StatisticsService
 
@@ -59,6 +58,7 @@ class PostService:
         
         try:
             db.session.commit()
+            current_app.logger.info(f"文章建立成功：ID={post.id}, 標題={post.title}, 狀態={status}")
             
             # 清除快取
             CategoryService.clear_category_cache()
@@ -132,6 +132,7 @@ class PostService:
         
         try:
             db.session.commit()
+            current_app.logger.info(f"文章更新成功：ID={post.id}, 標題={post.title}, 狀態={post.status}")
             
             # 清除快取
             CategoryService.clear_category_cache()

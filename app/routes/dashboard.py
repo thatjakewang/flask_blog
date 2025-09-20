@@ -10,7 +10,6 @@ from flask_login import login_required, current_user
 from app.models import Post, db, Category
 from app.forms import PostForm, CategoryForm
 from sqlalchemy.exc import IntegrityError
-from app import cache
 from app.services.statistics_service import StatisticsService
 from app.services.category_service import CategoryService
 from app.services.post_service import PostService

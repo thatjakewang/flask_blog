@@ -11,10 +11,8 @@ from flask_login import UserMixin
 from datetime import datetime, timezone
 from sqlalchemy import event, func
 import pytz
-from flask import current_app
+from flask import current_app, Flask
 from app.utils import clean_html_content
-from wtforms.validators import Email
-from wtforms import ValidationError
 
 
 # ========================================
@@ -215,26 +213,34 @@ class Post(db.Model):
         if not self.created_at:
             return None
         
-        # 確保 created_at 是 aware datetime
-        if self.created_at.tzinfo is None:
-            # 如果是 naive datetime，假設它是 UTC
-            aware_dt = pytz.UTC.localize(self.created_at)
-        else:
-            aware_dt = self.created_at
-            
-        tz_name = app.config.get('TIMEZONE', 'UTC') if app else current_app.config.get('TIMEZONE', 'UTC')
-        tz = pytz.timezone(tz_name)
-        return aware_dt.astimezone(tz)
+        try:
+            # 確保 created_at 是 aware datetime
+            if self.created_at.tzinfo is None:
+                # 如果是 naive datetime，假設它是 UTC
+                aware_dt = pytz.UTC.localize(self.created_at)
+            else:
+                aware_dt = self.created_at
+                
+            tz_name = app.config.get('TIMEZONE', 'UTC') if app else current_app.config.get('TIMEZONE', 'UTC')
+            tz = pytz.timezone(tz_name)
+            return aware_dt.astimezone(tz)
+        except Exception as e:
+            current_app.logger.warning(f"時區轉換錯誤 (created_at): {e}")
+            return self.created_at
 
     def local_updated_at(self, app: 'Flask' = None):
         """轉換 updated_at 為配置時區"""
         if not self.updated_at:
             return None
             
-        # updated_at 應該已經是 aware datetime (有 timezone)
-        tz_name = app.config.get('TIMEZONE', 'UTC') if app else current_app.config.get('TIMEZONE', 'UTC')
-        tz = pytz.timezone(tz_name)
-        return self.updated_at.astimezone(tz)
+        try:
+            # updated_at 應該已經是 aware datetime (有 timezone)
+            tz_name = app.config.get('TIMEZONE', 'UTC') if app else current_app.config.get('TIMEZONE', 'UTC')
+            tz = pytz.timezone(tz_name)
+            return self.updated_at.astimezone(tz)
+        except Exception as e:
+            current_app.logger.warning(f"時區轉換錯誤 (updated_at): {e}")
+            return self.updated_at
     
     @property
     def category_name(self):
@@ -269,7 +275,7 @@ class Post(db.Model):
         }
 
     @staticmethod
-    @cache.cached(timeout=300, key_prefix='blog_available_categories')
+    @cache.cached(timeout=600, key_prefix='blog_available_categories')  # 增加快取時間到10分鐘
     def get_available_categories():
         """取得所有可用的分類名稱（快取）"""
         try:
@@ -280,7 +286,9 @@ class Post(db.Model):
                 .distinct()\
                 .order_by(Category.name)\
                 .all()
-            return [cat[0] for cat in categories]
+            result = [cat[0] for cat in categories]
+            current_app.logger.debug(f"載入可用分類：{len(result)}個")
+            return result
         except Exception as e:
             current_app.logger.error(f"Failed to fetch categories: {e}")
             return []
@@ -340,6 +348,6 @@ def clear_category_cache_on_post_change(mapper, connection, target):
     try:
         from app import cache
         cache.delete('blog_available_categories')
-    except Exception as e:
+    except Exception:
         # 在事件監聽器中避免拋出異常
         pass

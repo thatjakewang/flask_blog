@@ -42,8 +42,8 @@ class Config:
     # Security Configuration
     FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'true').lower() == 'true'
     
-    # Category Cache Timeout
-    CATEGORY_CACHE_TIMEOUT = 300
+    # Category Cache Timeout (10 minutes)
+    CATEGORY_CACHE_TIMEOUT = 600
     
     # Flask-Caching Configuration
     CACHE_TYPE = 'SimpleCache'
@@ -62,15 +62,15 @@ class Config:
     @classmethod
     def init_app(cls, app):
         """
-        Initialize application with this config
+        初始化應用程式配置
         
-        This method is called after the app is created and configured.
-        Subclasses can override this to perform environment-specific initialization.
+        此方法在應用程式建立和配置後呼叫。
+        子類別可以覆寫此方法來執行環境特定的初始化。
         
         Args:
-            app: Flask application instance
+            app: Flask 應用程式實例
         """
-        # Base implementation - subclasses can extend this
+        # 基礎實作 - 子類別可以擴展此方法
         pass
 
 
@@ -126,10 +126,10 @@ class ProductionConfig(Config):
         
     def __init__(self):
         super().__init__()
-        self._validate_production_config()
+        self.__class__._validate_production_config()
     
     @classmethod
-    def _validate_production_config(self):
+    def _validate_production_config(cls):
         """Validate that all required production settings are present"""
         required_vars = ['SECRET_KEY', 'DATABASE_URL']
         missing_vars = [var for var in required_vars if not os.environ.get(var)]

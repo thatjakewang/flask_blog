@@ -94,7 +94,7 @@ def check_config():
             raise e
         
         with app.app_context():
-            print(f"✓ App created successfully")
+            print("✓ App created successfully")
             print(f"✓ Debug mode: {app.config.get('DEBUG')}")
             print(f"✓ Database URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}")
             print(f"✓ Secret key configured: {'Yes' if app.config.get('SECRET_KEY') else 'No'}")
@@ -212,9 +212,11 @@ except Exception as e:
     from flask import Flask
     app = Flask(__name__)
     
+    error_message = str(e)
+
     @app.route('/')
     def error():
-        return f"Application initialization failed: {str(e)}", 500
+        return f"Application initialization failed: {error_message}", 500
 
 
 # ========================================
