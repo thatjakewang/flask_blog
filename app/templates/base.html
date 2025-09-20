@@ -54,13 +54,6 @@
           <li class="{% if active_page=='home' %}active{% endif %}">
             <a href="{{ url_for('main.index')}}" aria-label="Home">首頁</a>
           </li>
-          {% if available_categories %}
-            {% for cat in available_categories %}
-            <li class="{% if active_page=='category' and category.slug==cat.slug %}active{% endif %}">
-              <a href="{{ url_for('main.category', slug=cat.slug) }}" aria-label="{{ cat.name }}">{{ cat.name }}</a>
-            </li>
-            {% endfor %}
-          {% endif %}
           {% if current_user.is_authenticated %}
           <li class="{% if active_page=='dashboard' %}active{% endif %}">
             <a href="{{ url_for('dashboard.index') }}" aria-label="Dashboard">Dashboard</a>
