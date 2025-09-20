@@ -12,7 +12,6 @@ from flask_login import LoginManager
 from flask_caching import Cache
 
 from config import get_config
-from sqlalchemy.exc import SQLAlchemyError
 
 # 初始化擴充套件
 db = SQLAlchemy()
@@ -52,13 +51,14 @@ def init_csrf(app: 'Flask') -> None:
 def configure_logging(app: 'Flask') -> None:
     """根據環境配置應用程式日誌"""
     if app.debug:
-        # 開發環境日誌 - 控制台輸出
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        console_handler.setLevel(logging.DEBUG)
-        app.logger.addHandler(console_handler)
+        # 開發環境日誌 - 控制台輸出（避免重複附加 handler）
+        if not any(isinstance(h, logging.StreamHandler) for h in app.logger.handlers):
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            ))
+            console_handler.setLevel(logging.DEBUG)
+            app.logger.addHandler(console_handler)
         app.logger.setLevel(logging.DEBUG)
         app.logger.info('Development logging configured')
     else:
@@ -77,16 +77,17 @@ def configure_logging(app: 'Flask') -> None:
                 # 回退到當前目錄
                 log_file = 'app.log'
         
-        file_handler = RotatingFileHandler(
-            log_file, 
-            maxBytes=10*1024*1024,  # 10MB
-            backupCount=10
-        )
-        file_handler.setFormatter(logging.Formatter(
-            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-        ))
-        file_handler.setLevel(logging.INFO)
-        app.logger.addHandler(file_handler)
+        if not any(isinstance(h, RotatingFileHandler) for h in app.logger.handlers):
+            file_handler = RotatingFileHandler(
+                log_file, 
+                maxBytes=10*1024*1024,  # 10MB
+                backupCount=10
+            )
+            file_handler.setFormatter(logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+            ))
+            file_handler.setLevel(logging.INFO)
+            app.logger.addHandler(file_handler)
         app.logger.setLevel(logging.INFO)
         app.logger.info('Production logging configured')
 
@@ -137,6 +138,10 @@ def setup_security_headers(app: 'Flask') -> None:
         if csp_config:
             csp_parts = []
             for directive, values in csp_config.items():
+                if directive in ('script-src', 'style-src'):
+                    nonce = getattr(g, 'csp_nonce', None)
+                    if nonce:
+                        values = list(values) + [f"'nonce-{nonce}'"]
                 if values:
                     csp_parts.append(f"{directive} {' '.join(values)}")
                 else:
@@ -181,17 +186,27 @@ def register_context_processors(app: 'Flask') -> None:
     @app.context_processor
     def inject_template_vars():
         """Inject common variables into template context"""
-        from app.models import Post 
+        from app.models import Post, Category
         tz = pytz.timezone(app.config.get('TIMEZONE', 'UTC'))
+
+        # 提供導覽列的分類（加上快取，降低查詢負載）
+        categories = cache.get('nav_available_categories')
+        if categories is None:
+            try:
+                categories = Category.query.order_by(Category.name).all()
+            except Exception:
+                categories = []
+            cache.set('nav_available_categories', categories, timeout=app.config.get('CATEGORY_CACHE_TIMEOUT', 300))
+
         return {
             'now': datetime.now(tz),
             'csp_nonce': getattr(g, 'csp_nonce', ''),
             'app_version': app.config.get('VERSION', '1.0.0'),
             'debug_mode': app.debug,
             'csrf_enabled': csrf is not None,
+            'available_categories': categories,
             'Post': Post,
         }
-
 
 def create_app(config_name: str = None, config_class = None) -> 'Flask':
     """

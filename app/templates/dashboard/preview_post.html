@@ -18,7 +18,7 @@
     </div>
     {% if post.thumbnail %}
     <div class="post-thumbnail">
-      <img src="{{ post.thumbnail }}" alt="Preview: {{ post.title }}" loading="eager" fetchpriority="high">
+        <img src="{{ url_for('static', filename='images/' + post.thumbnail) }}" alt="Preview: {{ post.title }}" loading="eager" fetchpriority="high">
     </div>
     {% endif %}
   </header>

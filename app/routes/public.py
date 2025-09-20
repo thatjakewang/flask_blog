@@ -95,20 +95,12 @@ def category(slug):
         .paginate(page=page, per_page=per_page, error_out=False)
 
     posts = pagination.items
-    if not posts:
-        # Check if category exists at all (case-insensitive)
-        category_exists = Category.query.filter(func.lower(Category.slug) == slug.lower()).first()
-        if not category_exists:
-            abort(404)
-    
-    all_categories = Post.get_category_stats()
 
     return render_template(
         'main/category.html',
         posts=posts,
         pagination=pagination,
         category=category,   # 傳整個 category object 給 template，比單純 name 更彈性
-        all_categories=all_categories,
         active_page='category'
     )
 

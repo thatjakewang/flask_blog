@@ -7,7 +7,7 @@
   <meta name="description" content="{% block meta_description %}Jake Wang 的技術分享與生活記錄{% endblock %}" />
 
   <!-- Main CSS file with versioning -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=now.timestamp()) }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=now.timestamp()|int) }}">
   <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon" />
 
   <!-- Google Analytics (deferred loading) -->
@@ -27,12 +27,12 @@
   </script>
 
   <!-- JSON-LD for Organization -->
-  <script type="application/ld+json">
+  <script type="application/ld+json" nonce="{{ g.csp_nonce }}">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Jakeblog",
-    "url": "{{ request.url_root }}",
+    "url": "{{ url_for('main.index', _external=True) }}",
     "logo": "{{ url_for('static', filename='images/logo.png', _external=True) }}",
     "sameAs": [
       "https://twitter.com/thejakewang"

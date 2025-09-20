@@ -11,7 +11,7 @@
 <meta property="og:description" content="{{ post.description }}" />
 <meta
   property="og:image"
-  content="{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}"
+  content="{{ url_for('static', filename='images/' + post.thumbnail, _external=True) if post.thumbnail else url_for('static', filename='images/default-thumbnail.png', _external=True) }}"
 />
 <meta property="og:url" content="{{ request.url }}" />
 <meta property="og:site_name" content="Jakedaily" />
@@ -35,7 +35,7 @@
 <meta name="twitter:description" content="{{ post.description }}" />
 <meta
   name="twitter:image"
-  content="{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}"
+  content="{{ url_for('static', filename='images/' + post.thumbnail, _external=True) if post.thumbnail else url_for('static', filename='images/default-thumbnail.png', _external=True) }}"
 />
 
 <!-- LCP Image Preload for Performance -->
@@ -53,11 +53,11 @@
   "@type": "Article",
   "headline": "{{ post.title }}",
   "description": "{{ post.description }}",
-  "image": "{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] if post.thumbnail else url_for('static', filename='images/default-thumbnail.png') }}",
+  "image": "{{ url_for('static', filename='images/' + post.thumbnail, _external=True) if post.thumbnail else url_for('static', filename='images/default-thumbnail.png', _external=True) }}",
   "author": {
     "@type": "Person",
     "name": "Jake Wang",
-    "url": "{{ request.url_root }}",
+    "url": "{{ url_for('main.index', _external=True) }}",
     "sameAs": [
       "https://twitter.com/thejakewang",
       "https://linkedin.com/in/thejakewang"
@@ -66,10 +66,10 @@
   "publisher": {
     "@type": "Organization",
     "name": "Jakedaily",
-    "url": "{{ request.url_root }}",
+    "url": "{{ url_for('main.index', _external=True) }}",
     "logo": {
       "@type": "ImageObject",
-      "url": "{{ request.url_root }}{{ url_for('static', filename='images/logo.png')[1:] }}"
+      "url": "{{ url_for('static', filename='images/logo.png', _external=True) }}"
     }
   },
   "datePublished": "{{ post.created_at.isoformat() if post.created_at else '' }}",

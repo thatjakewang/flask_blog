@@ -13,12 +13,10 @@ from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField, PasswordField, SelectField
 from wtforms.validators import DataRequired, Length, Regexp, ValidationError, Email, Optional
-from lxml.etree import ParserError
-import bleach
-from app.utils import ALLOWED_HTML_TAGS
 from flask_login import current_user
 from app.models import Category
 from app import cache
+from app.utils import clean_html_content
 
 class PostForm(FlaskForm):
 
@@ -49,34 +47,7 @@ class PostForm(FlaskForm):
     preview = SubmitField('Preview')
     publish = SubmitField('Publish')
     
-    # 修復：使用自定義屬性過濾函數
-    def _custom_attribute_filter(self, tag, name, value):
-        """
-        自定義屬性過濾函數，用於 bleach.clean()
-        """
-        # 允許基本屬性
-        if name in ['class', 'id', 'alt']:
-            return True
-        
-        # 處理 img 標籤的 src 屬性
-        if tag == 'img' and name == 'src':
-            if not isinstance(value, str):
-                return False
-            trusted_domains = ['https://jake.tw','/static/']
-            return any(value.startswith(domain) for domain in trusted_domains)
-        
-        # 處理 a 標籤的 href 屬性  
-        if tag == 'a' and name == 'href':
-            if not isinstance(value, str):
-                return False
-            return value.startswith(('http://', 'https://'))
-        
-            # Allow boolean "open" attribute on <details>
-            # bleach passes attribute name for boolean attributes; ensure we keep it
-            if tag == 'details' and name == 'open':
-                return True
-        
-        return False
+    # 已移除表單層級自定義屬性過濾；統一使用 utils.clean_html_content
 
     def _update_category_choices(self):
         """更新分類選項，每次都從資料庫重新載入"""
@@ -121,25 +92,15 @@ class PostForm(FlaskForm):
             raise ValidationError('此網址代碼已存在，請選擇其他代碼。')
 
     def validate_content(self, field):
-        if len(field.data) > 100000:
+        if len(field.data or '') > 100000:
             raise ValidationError('內容過長，請縮短內容。')
-        
+        # 與後端一致：使用 utils.clean_html_content 進行清理
         try:
-            # 使用自定義屬性過濾函數進行清理
-            cleaned_content = bleach.clean(
-                field.data,
-                tags=ALLOWED_HTML_TAGS,
-                attributes=self._custom_attribute_filter,
-                protocols=['http', 'https'],
-                strip=True
-            )
-            field.data = cleaned_content
-            
-        except ParserError:
-            raise ValidationError('HTML格式不正確。')
+            field.data = clean_html_content(field.data or '', context='form')
         except Exception as e:
-            current_app.logger.error(f"Content validation error: {e}")
-            raise ValidationError(f'內容處理錯誤：{str(e)} 請檢查 HTML 格式。')
+            if current_app:
+                current_app.logger.error(f"Content validation error: {e}")
+            raise ValidationError('內容處理錯誤，請檢查內容格式。')
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[

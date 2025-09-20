@@ -17,7 +17,7 @@
 {% endif %}
 
 <!-- JSON-LD for Blog/Category Page -->
-<script type="application/ld+json">
+  <script type="application/ld+json" nonce="{{ g.csp_nonce }}">
 {
   "@context": "https://schema.org",
   "@type": "{% if is_category %}Blog{% else %}Website{% endif %}",
@@ -35,15 +35,15 @@
   "publisher": {
     "@type": "Organization",
     "name": "Jakeblog",
-    "url": "{{ request.url_root }}",
+    "url": "{{ url_for('main.index', _external=True) }}",
     "logo": {
       "@type": "ImageObject",
-      "url": "{{ request.url_root }}{{ url_for('static', filename='images/logo.png')[1:] }}"
+      "url": "{{ url_for('static', filename='images/logo.png', _external=True) }}"
     }
   },
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "{{ request.url_root }}search?q={search_term_string}",
+    "target": "{{ url_for('main.index', _external=True) ~ 'search?q={search_term_string}' }}",
     "query-input": "required name=search_term_string"
   }{% endif %}{% if posts %},
   "blogPost": [
@@ -52,8 +52,8 @@
       "@type": "BlogPosting",
       "headline": "{{ post.title }}",
       "description": "{{ post.description }}",
-      {% if post.thumbnail %}"image": "{{ request.url_root }}{{ url_for('static', filename='images/' + post.thumbnail)[1:] }}",{% endif %}
-      "url": "{{ request.url_root }}{{ url_for('main.post', slug=post.slug or 'untitled-' + post.id|string)[1:] }}",
+      {% if post.thumbnail %}"image": "{{ url_for('static', filename='images/' + post.thumbnail, _external=True) }}",{% endif %}
+      "url": "{{ url_for('main.post', slug=post.slug or 'untitled-' + post.id|string, _external=True) }}",
       "datePublished": "{{ post.created_at.isoformat() if post.created_at else '' }}",
       "author": {
         "@type": "Person",

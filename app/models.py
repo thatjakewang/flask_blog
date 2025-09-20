@@ -73,14 +73,6 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
     
-    def validate_email(self, email: str) -> None:
-        """驗證電子郵件格式"""
-        validator = Email()
-        try:
-            validator(None, email)
-        except ValidationError:
-            raise ValidationError("Invalid email format.")
-    
     def update_last_login(self) -> None:
         """更新最後登入時間"""
         self.last_login = datetime.utcnow()

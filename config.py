@@ -128,6 +128,7 @@ class ProductionConfig(Config):
         super().__init__()
         self._validate_production_config()
     
+    @classmethod
     def _validate_production_config(self):
         """Validate that all required production settings are present"""
         required_vars = ['SECRET_KEY', 'DATABASE_URL']
@@ -159,6 +160,8 @@ class ProductionConfig(Config):
     def init_app(cls, app):
         """Initialize production-specific settings"""
         super().init_app(app)
+
+        cls._validate_production_config()
         
         # Ensure log directory exists
         log_file = app.config.get('LOG_FILE', 'logs/app.log')

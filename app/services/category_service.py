@@ -65,6 +65,7 @@ class CategoryService:
         """Clear category-related caches"""
         cache.delete('blog_available_categories')
         cache.delete('blog_category_choices')
+        cache.delete('nav_available_categories')
         cache.delete_memoized(CategoryService.get_category_choices)
         
         # 也清除統計快取，因為分類數量可能已改變

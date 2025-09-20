@@ -28,8 +28,6 @@ class PostService:
         回傳:
             包含成功狀態、訊息和文章編號（如果成功）的字典
         """
-        # 決定文章狀態
-        status = 'publish' if action == 'publish' else 'draft'
         
         # 取得分類編號，或如果未提供則指定預設分類
         category_id = form_data.get('category_id')
@@ -37,16 +35,15 @@ class PostService:
             default_category = CategoryService.get_or_create_default_category()
             category_id = default_category.id
         
-        # 清理 HTML 內容
-        cleaned_content = clean_html_content(form_data.get('content', ''))
-        
+        status = 'published' if action == 'publish' else 'draft'
+
         # 建立新文章
         post = Post(
             title=form_data.get('title'),
             slug=form_data.get('slug', '').lower(),
             thumbnail=form_data.get('thumbnail'),
             description=form_data.get('description'),
-            content=cleaned_content,
+            content=form_data.get('content', ''),
             category_id=category_id,
             status=status,
             author_id=current_user.id
@@ -59,13 +56,14 @@ class PostService:
         
         db.session.add(post)
         
+        
         try:
             db.session.commit()
             
             # 清除快取
             CategoryService.clear_category_cache()
             StatisticsService.clear_stats_cache()
-            
+        
             return {
                 'success': True,
                 'message': f'文章{"發布" if status == "published" else "儲存"}成功！',
@@ -127,7 +125,7 @@ class PostService:
         post.slug = form_data.get('slug', '').lower()
         post.thumbnail = form_data.get('thumbnail')
         post.description = form_data.get('description')
-        post.content = clean_html_content(form_data.get('content', ''))
+        post.content = form_data.get('content', '')
         post.category_id = category_id
         
         current_app.logger.info(f"更新文章 {post.id}：狀態={post.status}")
