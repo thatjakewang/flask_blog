@@ -1,8 +1,17 @@
 import os
+from datetime import timedelta
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    """Safely parse boolean-like environment variables."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 """
 Application Configuration Module
@@ -34,13 +43,21 @@ class Config:
     WTF_CSRF_TIME_LIMIT = 3600
     
     # Session Configuration
-    SESSION_COOKIE_SECURE = True
+    FORCE_HTTPS = env_bool('FORCE_HTTPS', False)
+    SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', FORCE_HTTPS)
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
     PERMANENT_SESSION_LIFETIME = 3600  # 1 hour
     
+    # Remember-me Configuration
+    REMEMBER_COOKIE_SECURE = env_bool('REMEMBER_COOKIE_SECURE', SESSION_COOKIE_SECURE)
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = os.environ.get('REMEMBER_COOKIE_SAMESITE', SESSION_COOKIE_SAMESITE)
+    REMEMBER_COOKIE_DURATION = timedelta(days=int(os.environ.get('REMEMBER_COOKIE_DURATION_DAYS', '14')))
+    
     # Security Configuration
-    FORCE_HTTPS = os.environ.get('FORCE_HTTPS', 'true').lower() == 'true'
+    WTF_CSRF_SSL_STRICT = env_bool('WTF_CSRF_SSL_STRICT', FORCE_HTTPS)
+    PREFERRED_URL_SCHEME = 'https' if FORCE_HTTPS or SESSION_COOKIE_SECURE else 'http'
     
     # Category Cache Timeout (10 minutes)
     CATEGORY_CACHE_TIMEOUT = 600
@@ -126,10 +143,15 @@ class ProductionConfig(Config):
     
     # 正式環境數據庫配置
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    
-    # 臨時修復：如果沒有 HTTPS，允許在 HTTP 下使用 session
-    SESSION_COOKIE_SECURE = os.environ.get('HTTPS_ENABLED', 'false').lower() == 'true'
-    FORCE_HTTPS = os.environ.get('HTTPS_ENABLED', 'false').lower() == 'true'
+
+    HTTPS_ENABLED = env_bool('HTTPS_ENABLED', True)
+    SESSION_COOKIE_SECURE = HTTPS_ENABLED
+    REMEMBER_COOKIE_SECURE = HTTPS_ENABLED
+    SESSION_COOKIE_SAMESITE = 'None' if HTTPS_ENABLED else Config.SESSION_COOKIE_SAMESITE
+    REMEMBER_COOKIE_SAMESITE = 'None' if HTTPS_ENABLED else Config.REMEMBER_COOKIE_SAMESITE
+    FORCE_HTTPS = HTTPS_ENABLED
+    WTF_CSRF_SSL_STRICT = HTTPS_ENABLED
+    PREFERRED_URL_SCHEME = 'https' if HTTPS_ENABLED else 'http'
         
     def __init__(self):
         super().__init__()
@@ -169,6 +191,11 @@ class ProductionConfig(Config):
         super().init_app(app)
 
         cls._validate_production_config()
+
+        if not cls.HTTPS_ENABLED:
+            app.logger.warning('HTTPS enforcement is disabled in production. Set HTTPS_ENABLED=true once TLS is configured.')
+        else:
+            app.logger.info('HTTPS enforcement enabled; secure cookies and redirects are active.')
         
         # Ensure log directory exists
         log_file = app.config.get('LOG_FILE', 'logs/app.log')

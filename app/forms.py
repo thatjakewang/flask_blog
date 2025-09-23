@@ -110,6 +110,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(message="密碼為必填欄位。")])
     submit = SubmitField('Login')
 
+    def validate_email(self, field):
+        field.data = (field.data or '').strip().lower()
+
 class CategoryForm(FlaskForm):
     def __init__(self, original_category=None, *args, **kwargs):
         super().__init__(*args, **kwargs)

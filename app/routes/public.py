@@ -121,14 +121,19 @@ def admin_login():
     form = LoginForm()
     
     if form.validate_on_submit():
-        email = form.email.data
+        email = User.normalize_email(form.email.data)
         password = form.password.data
+
+        if not email:
+            current_app.logger.warning("登入失敗：提供的電子郵件為空值")
+            flash('請輸入有效的電子郵件。', 'danger')
+            return redirect(url_for('auth.admin_login'))
         
         # 記錄登入嘗試
         current_app.logger.info(f"Login attempt for email: {email}")
         
         # 查詢用戶
-        user = User.query.filter_by(email=email).first()
+        user = User.find_by_email(email)
         
         if user is None:
             current_app.logger.warning(f"登入失敗：找不到電子郵件 {email} 的使用者")

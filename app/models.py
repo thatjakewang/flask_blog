@@ -5,11 +5,14 @@ Database Models Module
 This module contains all database models for the Flask blog application.
 All models are consolidated in this single file for better maintainability.
 """
+from typing import Optional
+
 from app import db, cache
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from datetime import datetime, timezone
 from sqlalchemy import event, func
+from sqlalchemy.orm import validates
 import pytz
 from flask import current_app, Flask
 from app.utils import clean_html_content
@@ -43,6 +46,28 @@ class User(UserMixin, db.Model):
     # 修復：使用 back_populates 保持一致性
     posts = db.relationship('Post', back_populates='author', lazy='dynamic',
                           cascade='all, delete-orphan')
+
+    @staticmethod
+    def normalize_email(email: Optional[str]) -> Optional[str]:
+        """Normalize email addresses for consistent lookups."""
+        if email is None:
+            return None
+        normalized = email.strip()
+        if not normalized:
+            return None
+        return normalized.lower()
+
+    @classmethod
+    def find_by_email(cls, email: Optional[str]) -> 'Optional[User]':
+        """Lookup a user by email using case-insensitive comparison."""
+        normalized = cls.normalize_email(email)
+        if not normalized:
+            return None
+        return cls.query.filter(func.lower(cls.email) == normalized).first()
+
+    @validates('email')
+    def _normalize_email_on_write(self, key, value):
+        return self.normalize_email(value)
 
     def set_password(self, password: str) -> None:
         """
@@ -357,3 +382,4 @@ def clear_category_cache_on_post_change(mapper, connection, target):
     except Exception:
         # 在事件監聽器中避免拋出異常
         pass
+
