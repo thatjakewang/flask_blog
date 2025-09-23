@@ -17,23 +17,19 @@ def init_production():
     os.environ['FLASK_ENV'] = 'production'
     os.environ['HTTPS_ENABLED'] = 'false'
     
-    # 檢查必要的環境變數
-    required_vars = ['SECRET_KEY', 'DATABASE_URL']
-    missing_vars = []
+    # 如果沒有設定 DATABASE_URL，使用預設路徑
+    if not os.environ.get('DATABASE_URL'):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(base_dir, 'production.db')
+        os.environ['DATABASE_URL'] = f'sqlite:///{db_path}'
+        print(f"使用預設數據庫路徑: {db_path}")
     
-    for var in required_vars:
-        if not os.environ.get(var):
-            missing_vars.append(var)
+    # 如果沒有設定 SECRET_KEY，使用預設值
+    if not os.environ.get('SECRET_KEY'):
+        os.environ['SECRET_KEY'] = '5633a432b80c51cb7fbd54ff474bda18377e9da8c23174e2'
+        print("使用預設 SECRET_KEY")
     
-    if missing_vars:
-        print("❌ 缺少必要的環境變數:")
-        for var in missing_vars:
-            print(f"   - {var}")
-        print("\n請設定以下環境變數:")
-        print("export SECRET_KEY='your-secret-key'")
-        print("export DATABASE_URL='sqlite:///instance/production.db'")
-        print("export HTTPS_ENABLED='false'")
-        return False
+    print(f"DATABASE_URL: {os.environ.get('DATABASE_URL')}")
     
     try:
         from app import create_app, db
