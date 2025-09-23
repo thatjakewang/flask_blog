@@ -123,6 +123,10 @@ class ProductionConfig(Config):
     """Production Environment Configuration (線上生產環境)"""
     
     DEBUG = False
+    
+    # 臨時修復：如果沒有 HTTPS，允許在 HTTP 下使用 session
+    SESSION_COOKIE_SECURE = os.environ.get('HTTPS_ENABLED', 'false').lower() == 'true'
+    FORCE_HTTPS = os.environ.get('HTTPS_ENABLED', 'false').lower() == 'true'
         
     def __init__(self):
         super().__init__()
