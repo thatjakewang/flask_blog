@@ -144,9 +144,13 @@ def admin_login():
         login_user(user, remember=True)
         current_app.logger.info(f"使用者 {email} 成功登入")
         
-        # 更新最後登入時間
-        if hasattr(user, 'update_last_login'):
-            user.update_last_login()
+        # 更新最後登入時間（安全方式）
+        try:
+            if hasattr(user, 'update_last_login'):
+                user.update_last_login()
+        except Exception as e:
+            current_app.logger.warning(f"Failed to update last login time: {e}")
+            # 不影響登入流程，繼續執行
         
         # 處理next頁面重定向
         next_page = request.args.get('next')

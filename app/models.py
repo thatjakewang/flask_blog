@@ -73,8 +73,14 @@ class User(UserMixin, db.Model):
     
     def update_last_login(self) -> None:
         """更新最後登入時間"""
-        self.last_login = datetime.utcnow()
-        db.session.commit()
+        try:
+            self.last_login = datetime.utcnow()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            # 記錄錯誤但不影響登入流程
+            if hasattr(current_app, 'logger'):
+                current_app.logger.warning(f"Failed to update last login time: {e}")
     
     @property
     def post_count(self):
