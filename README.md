@@ -10,49 +10,85 @@
 - **可維運性**：Flask-Migrate 資料庫遷移、`deploy.sh` 部署腳本、`app_launcher.py` 多環境啟動器，讓部署與設定更一致。
 
 ## 技術棧
-- Python 3.11+、Flask 3.1、Jinja2
-- Flask-SQLAlchemy、Flask-Migrate、Alembic
-- Flask-Login、Flask-WTF、WTForms
-- Flask-Caching、Bleach、python-dotenv
-- Gunicorn、Nginx、systemd（部署腳本示例）
+- **後端框架**：Python 3.11+、Flask 3.1.2、Jinja2 3.1.6
+- **資料庫**：Flask-SQLAlchemy 3.1.1、Flask-Migrate 4.1.0、Alembic 1.16.4
+- **認證與表單**：Flask-Login 0.6.3、Flask-WTF 1.2.2、WTForms 3.2.1
+- **快取與安全**：Flask-Caching 2.3.0、Bleach 6.2.0、python-dotenv 1.1.1
+- **WSGI 伺服器**：Gunicorn 23.0.0
+- **資料庫支援**：SQLite（預設）、PostgreSQL（psycopg2-binary 2.9.10）
+- **其他工具**：pytz 2024.2（時區處理）、requests 2.32.3、lxml 6.0.1
 
 ## 專案結構
 ```text
 .
+├── .env                           # 環境變數設定檔
+├── README.md                      # 專案說明文件
+├── requirements.txt               # Python 依賴套件清單
+├── app_launcher.py               # 應用程式啟動器
+├── config.py                     # 應用程式設定
+├── deploy.sh                     # 部署腳本
+├── app.log                       # 應用程式日誌檔案
 ├── app/
-│   ├── __init__.py
-│   ├── forms.py
-│   ├── models.py
+│   ├── __init__.py               # Flask 應用程式初始化
+│   ├── forms.py                  # WTForms 表單定義
+│   ├── models.py                 # SQLAlchemy 資料模型
+│   ├── utils.py                  # 工具函數
 │   ├── routes/
-│   │   ├── public.py
-│   │   └── dashboard.py
+│   │   ├── public.py             # 公開頁面路由
+│   │   └── dashboard.py          # 後台管理路由
 │   ├── services/
-│   │   ├── category_service.py
-│   │   ├── post_service.py
-│   │   └── statistics_service.py
+│   │   ├── __init__.py           # Services 模組初始化
+│   │   ├── category_service.py   # 分類服務邏輯
+│   │   ├── post_service.py       # 文章服務邏輯
+│   │   └── statistics_service.py # 統計服務邏輯
 │   ├── templates/
+│   │   ├── base.html             # 基礎模板
+│   │   ├── error_base.html       # 錯誤頁面基礎模板
+│   │   ├── form_macros.html      # 表單巨集
+│   │   ├── sitemap.xml           # Sitemap 模板
 │   │   ├── auth/
+│   │   │   └── login.html        # 登入頁面
 │   │   ├── blog/
+│   │   │   └── post.html         # 文章詳細頁面
 │   │   ├── dashboard/
+│   │   │   ├── index.html        # 後台首頁
+│   │   │   ├── posts.html        # 文章列表
+│   │   │   ├── new_post.html     # 新增文章
+│   │   │   ├── edit_post.html    # 編輯文章
+│   │   │   ├── post_form.html    # 文章表單
+│   │   │   ├── preview_post.html # 文章預覽
+│   │   │   ├── categories.html   # 分類列表
+│   │   │   ├── new_category.html # 新增分類
+│   │   │   ├── edit_category.html # 編輯分類
+│   │   │   └── category_form.html # 分類表單
 │   │   ├── error/
-│   │   ├── main/
-│   │   └── sitemap.xml
-│   ├── static/
-│   │   ├── css/
-│   │   ├── fonts/
-│   │   ├── images/
-│   │   └── robots.txt
-│   └── utils.py
-├── app_launcher.py
-├── config.py
-├── deploy.sh
+│   │   │   ├── 403.html          # 403 錯誤頁面
+│   │   │   ├── 404.html          # 404 錯誤頁面
+│   │   │   └── 500.html          # 500 錯誤頁面
+│   │   └── main/
+│   │       ├── index.html        # 首頁
+│   │       ├── category.html     # 分類頁面
+│   │       └── post_list.html    # 文章列表頁面
+│   └── static/
+│       ├── robots.txt            # 搜尋引擎規則
+│       ├── css/
+│       │   └── style.css         # 主要樣式表
+│       ├── fonts/
+│       │   ├── OpenSans-Regular.woff2
+│       │   └── OpenSans-Bold.woff2
+│       └── images/               # 圖片資源
 ├── instance/
-│   └── blog.db
+│   └── blog.db                   # SQLite 資料庫檔案
 ├── migrations/
-│   ├── env.py
+│   ├── README                    # Alembic 說明
+│   ├── alembic.ini               # Alembic 設定檔
+│   ├── env.py                    # 遷移環境設定
+│   ├── script.py.mako            # 遷移腳本模板
 │   └── versions/
-├── requirements.txt
-└── README.md
+│       ├── 435be81be7e8_initial_migration_with_category.py
+│       ├── 548b1b22cdb1_add_missing_user_columns.py
+│       └── 5f9b0d05cda9_fix_boolean_fields_nullable.py
+└── venv/                         # Python 虛擬環境（建議加入 .gitignore）
 ```
 
 ## 系統需求
